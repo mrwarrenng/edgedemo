@@ -210,12 +210,19 @@
         <div style="display:flex;align-items:center;gap:0.75rem;">
           <span class="kicker" style="margin:0;">Backup</span>
           <span style="font-size:.82rem;color:#9db7c6;font-family:var(--font-body);">medfordoregon.gov — EDGE homepage prototype</span>
+          <span style="font-size:.78rem;color:#9db7c6;font-family:var(--font-body);opacity:.75;">· Click any link to navigate inside this slide</span>
         </div>
-        <span style="font-size:.82rem;color:#72A300;font-family:var(--font-body);">Deployment vision: edge.medfordoregon.gov</span>
+        <div style="display:flex;align-items:center;gap:0.9rem;">
+          <button id="reset-medford-prototype" type="button"
+            style="background:rgba(114,163,0,.12);border:1px solid rgba(114,163,0,.45);color:#bfe26b;font-size:.78rem;font-family:var(--font-body);padding:4px 10px;border-radius:4px;cursor:pointer;letter-spacing:.02em;">
+            ↺ Reset prototype
+          </button>
+          <span style="font-size:.82rem;color:#72A300;font-family:var(--font-body);">Deployment vision: edge.medfordoregon.gov</span>
+        </div>
       </div>
       <!-- iframe fills remaining height -->
       <div class="reveal" style="flex:1;position:relative;overflow:hidden;">
-        <iframe
+        <iframe id="medford-prototype-iframe"
           srcdoc="<!DOCTYPE html>
 <html lang=&quot;en&quot;>
 <head>
@@ -712,17 +719,16 @@ body{margin:0;padding-top:28px;font-family:'Open Sans',sans-serif;color:#333;bac
 <script>
 function st(e,id){document.querySelectorAll('.tb').forEach(b=>b.classList.remove('on'));document.querySelectorAll('.tc').forEach(c=>c.classList.remove('on'));e.target.classList.add('on');document.getElementById(id).classList.add('on')}
 
-// Intercept all external links so they open in a new tab rather than
-// attempting to navigate the parent frame (which triggers CSP errors
-// when the demo is embedded as an iframe in the council presentation).
+// Force all external links to navigate the iframe in-place (target=_self) so
+// the council presentation can browse the live medfordoregon.gov pages
+// without ever leaving the slide. The 'Reset prototype' button on the slide
+// top bar reloads this srcdoc to return to the homepage mock.
 document.addEventListener('DOMContentLoaded', function() {
   document.querySelectorAll('a[href]').forEach(function(a) {
     const href = a.getAttribute('href');
-    // Only intercept external http(s) links that don't already preventDefault
     if (href &amp;&amp; (href.startsWith('http://') || href.startsWith('https://'))) {
-      // Don't double-wrap EDGE links that already have onclick preventDefault
       if (!a.getAttribute('onclick')) {
-        a.setAttribute('target', '_blank');
+        a.setAttribute('target', '_self');
         a.setAttribute('rel', 'noopener noreferrer');
       }
     }
@@ -744,6 +750,7 @@ document.addEventListener('DOMContentLoaded', function() {
 </div>
 <div class="nav-controls" aria-label="Slide navigation"><button class="nav-btn" onclick="changeSlide(-1)" aria-label="Previous slide">&#8249;</button><div class="slide-dots" id="dots"></div><button class="nav-btn" onclick="changeSlide(1)" aria-label="Next slide">&#8250;</button><span class="slide-counter" id="counter">1 / 11</span></div>
 <script>
+(function(){const btn=document.getElementById('reset-medford-prototype');const f=document.getElementById('medford-prototype-iframe');if(btn&&f){const original=f.getAttribute('srcdoc');btn.addEventListener('click',()=>{f.setAttribute('srcdoc',original);});}})();
 let current=1;const total=document.querySelectorAll('.slide').length;const dotsContainer=document.getElementById('dots');const counter=document.getElementById('counter');for(let i=1;i<=total;i++){const dot=document.createElement('div');dot.className='dot'+(i===1?' active':'');dot.onclick=()=>goToSlide(i);dotsContainer.appendChild(dot);}function goToSlide(n){const prev=document.querySelector('.slide.active');const next=document.querySelector(`.slide[data-slide="${n}"]`);if(prev)prev.classList.remove('active');if(next){next.classList.add('active');animateSlide(next);}current=n;updateNav();}function changeSlide(dir){let next=current+dir;if(next<1)next=total;if(next>total)next=1;goToSlide(next);}function updateNav(){document.querySelectorAll('.dot').forEach((d,i)=>d.classList.toggle('active',i+1===current));counter.textContent=current+' / '+total;}document.addEventListener('keydown',(e)=>{if(e.key==='ArrowRight'||e.key===' '){e.preventDefault();changeSlide(1);}if(e.key==='ArrowLeft'){e.preventDefault();changeSlide(-1);}});let touchStartX=0;document.addEventListener('touchstart',(e)=>{touchStartX=e.touches[0].clientX;});document.addEventListener('touchend',(e)=>{const diff=touchStartX-e.changedTouches[0].clientX;if(Math.abs(diff)>50)changeSlide(diff>0?1:-1);});function animateSlide(slide){slide.querySelectorAll('.reveal').forEach((el,i)=>{el.style.transition='none';el.style.opacity='0';el.style.transform='translateY(18px)';el.offsetHeight;const delay=i*0.07;el.style.transition=`opacity .35s ease ${delay}s, transform .35s ease ${delay}s`;el.style.opacity='1';el.style.transform='translateY(0)';});}try{animateSlide(document.querySelector('.slide.active'));}catch(e){console.warn(e);}
 </script>
 </body>
