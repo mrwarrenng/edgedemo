@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>medfordoregon.gov — EDGE Integration Prototype v4 (Faithful Reskin)</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&family=Open+Sans:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+/* ======= PROTOTYPE BAR ======= */
+.pb{position:fixed;top:0;left:0;right:0;z-index:10000;background:#1a1a2e;color:#fff;font:11px 'Open Sans',sans-serif;padding:4px 14px;display:flex;align-items:center;gap:14px}
+.pb .tg{background:#DC4405;padding:2px 6px;border-radius:2px;font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:.4px}
+.pb .i{flex:1;color:rgba(255,255,255,.75)}.pb .i b{color:#fff}
+.pb .lg{display:flex;gap:14px;font-size:13px}.pb .g{width:10px;height:10px;border:2px dashed #72A300;border-radius:2px}.pb .o{width:10px;height:10px;border:2px dashed #DC4405;border-radius:2px}
+body{margin:0;padding-top:28px;font-family:'Open Sans',sans-serif;color:#333;background:#fff;font-size:15px}
+
+:root{--b:#0076A8;--bd:#005a82;--g:#72A300;--gd:#5c8500;--sk:#00A7B5;--r:#DC4405;--gr:#75787B;--wg:#BFB8AF;--bg:#f4f5f6;--mw:min(1280px, 92vw)}
+
+/* Annotations */
+[data-e]{position:relative;outline:2px dashed var(--g)!important;outline-offset:3px}
+[data-e]::after{content:attr(data-e);position:absolute;top:-8px;right:4px;background:var(--g);color:#fff;font:700 7px/1.3 'Montserrat',sans-serif;padding:1px 5px;border-radius:2px;text-transform:uppercase;letter-spacing:.2px;white-space:nowrap;z-index:50;pointer-events:none}
+
+/* ======= UTILITY BAR (existing) ======= */
+.ut{background:var(--bd);font-size:13px}
+.ut .w{max-width:var(--mw);margin:0 auto;padding:5px 24px;display:flex;justify-content:flex-end;gap:14px}
+.ut a{color:rgba(255,255,255,.78);text-decoration:none;font-weight:600}.ut a:hover{color:#fff}
+
+/* ======= HEADER (existing) ======= */
+.hd{background:#fff;border-bottom:1px solid #e0e0e0}
+.hd .w{max-width:var(--mw);margin:0 auto;padding:10px 24px;display:flex;align-items:center;justify-content:space-between}
+.lo{display:flex;align-items:center;gap:9px;text-decoration:none}
+.lm{width:44px;height:44px;background:var(--b);border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font:800 italic 16px 'Montserrat',sans-serif}
+.lt{font:800 18px/1.15 'Montserrat',sans-serif;text-transform:uppercase;letter-spacing:1.2px;color:var(--b)}.lt span{display:block;font-size:10px;font-weight:600;letter-spacing:2.5px;color:var(--g)}
+.sr{display:flex}.sr input{border:2px solid #ddd;border-right:0;padding:5px 9px;font-size:13px;font-family:inherit;border-radius:3px 0 0 3px;width:220px;outline:none}
+.sr input:focus{border-color:var(--b)}.sr button{background:var(--b);color:#fff;border:2px solid var(--b);padding:5px 9px;border-radius:0 3px 3px 0;cursor:pointer;font-size:13px}
+
+/* ======= NAV (existing: Home, Government, Services, Residents, Business, Community) ======= */
+.nv{background:var(--b);position:relative}
+.nv .w{max-width:var(--mw);margin:0 auto;padding:0 24px;display:flex;align-items:stretch}
+.nv a{font:700 13px/1 'Montserrat',sans-serif;text-transform:uppercase;letter-spacing:.4px;color:#fff;text-decoration:none;padding:13px 18px;display:flex;align-items:center;gap:4px;transition:background .1s;white-space:nowrap}
+.nv a:hover{background:rgba(255,255,255,.1)}.nv a.on{background:rgba(0,0,0,.15)}
+.nv .c{font-size:9px;opacity:.5}
+/* Business mega menu trigger */
+.nv .biz-wrap{position:relative}
+.nv .biz-wrap:hover .mega{display:block}
+.mega{display:none;position:absolute;top:100%;left:0;background:#fff;border:1px solid #e0e0e0;border-radius:0 0 6px 6px;box-shadow:0 6px 24px rgba(0,0,0,.1);min-width:680px;padding:20px 24px;z-index:500;font-family:'Open Sans',sans-serif}
+.mega-cols{display:grid;grid-template-columns:1fr 1fr 1fr;gap:20px}
+.mega h6{font:700 12px/1.3 'Montserrat',sans-serif;text-transform:uppercase;letter-spacing:.4px;color:var(--b);margin:0 0 6px;padding-bottom:4px;border-bottom:2px solid var(--bg)}
+.mega a{display:block;font-size:17px;color:#444;text-decoration:none;padding:3px 0;font-weight:400}
+.mega a:hover{color:var(--b)}
+/* EDGE section inside mega menu */
+.mega .edge-sec{background:linear-gradient(135deg,var(--bd),var(--b));border-radius:6px;padding:14px;color:#fff;grid-column:span 1}
+.mega .edge-sec h6{color:var(--g);border-bottom-color:rgba(255,255,255,.15)}
+.mega .edge-sec a{color:rgba(255,255,255,.85);font-weight:600}.mega .edge-sec a:hover{color:#fff}
+
+/* ======= HERO (OC Rotating Banner) ======= */
+.hero{background:linear-gradient(135deg,#003d5c,var(--b),var(--bd));position:relative;overflow:hidden;min-height:320px}
+.hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 65% 90%,rgba(114,163,0,.08),transparent 55%)}
+.hero .w{max-width:var(--mw);margin:0 auto;padding:48px 24px;position:relative;z-index:2;display:grid;grid-template-columns:1.1fr 1fr;gap:40px;align-items:center}
+.hero h2{font:800 32px/1.2 'Montserrat',sans-serif;text-transform:uppercase;color:#fff;margin:0 0 8px;letter-spacing:.3px}
+.hero>div>p{font-size:17px;color:rgba(255,255,255,.8);line-height:1.55;margin:0 0 18px}
+.hb{display:flex;gap:7px;flex-wrap:wrap}
+.hbn{font:700 12px/1 'Montserrat',sans-serif;text-transform:uppercase;letter-spacing:.3px;padding:9px 16px;border-radius:3px;text-decoration:none;cursor:pointer;transition:all .1s}
+.hbn.p{background:#fff;color:var(--b)}.hbn.p:hover{background:#e8f4f8}
+.hbn.s{background:transparent;color:#fff;border:2px solid rgba(255,255,255,.28)}.hbn.s:hover{border-color:rgba(255,255,255,.5)}
+
+/* EDGE hero card */
+.ec{background:rgba(255,255,255,.06);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.1);border-radius:9px;padding:22px;color:#fff}
+.ec .ey{font:700 10px/1.3 'Montserrat',sans-serif;text-transform:uppercase;letter-spacing:1px;color:var(--g);margin-bottom:7px;display:flex;align-items:center;gap:4px}
+.ec .ey .d{width:5px;height:5px;background:var(--g);border-radius:50%;animation:p 2s infinite}
+@keyframes p{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(1.3)}}
+.ec h3{font:800 19px/1.25 'Montserrat',sans-serif;text-transform:uppercase;letter-spacing:.2px;margin:0 0 5px}
+.ec>p{font-size:13px;color:rgba(255,255,255,.65);line-height:1.45;margin:0 0 12px}
+.eql{display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-bottom:12px}
+.eql a{display:flex;align-items:center;gap:5px;padding:7px 8px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.07);border-radius:4px;color:#fff;text-decoration:none;font-size:13px;font-weight:600;transition:all .1s;cursor:pointer}
+.eql a:hover{background:rgba(255,255,255,.1)}
+.ego{display:block;text-align:center;padding:9px;background:var(--g);color:#fff;font:800 12px/1 'Montserrat',sans-serif;text-transform:uppercase;letter-spacing:.4px;border-radius:4px;text-decoration:none;cursor:pointer;transition:background .1s}
+.ego:hover{background:var(--gd)}
+
+/* ======= DO IT ONLINE TABS (existing 3 tabs: Our Government, Solve a Problem, Who to Call) ======= */
+.tabs{background:var(--bg);border-bottom:1px solid #e0e0e0}
+.tabs .w{max-width:var(--mw);margin:0 auto;padding:0 24px}
+.tr{display:flex}.tb{font:600 12px/1 'Montserrat',sans-serif;text-transform:uppercase;letter-spacing:.4px;color:var(--gr);background:none;border:none;border-bottom:3px solid transparent;padding:13px 20px;cursor:pointer;transition:all .1s;white-space:nowrap}
+.tb:hover{color:var(--b)}.tb.on{color:var(--b);border-bottom-color:var(--b);font-weight:700}
+.tc{padding:20px 0;display:none}.tc.on{display:block}
+.qg{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.qc{background:#fff;border:1px solid #e0e0e0;border-radius:5px;padding:20px 16px;text-align:center;text-decoration:none;color:var(--text);transition:all .12s;cursor:pointer}
+.qc:hover{border-color:var(--b);box-shadow:0 2px 10px rgba(0,118,168,.07);transform:translateY(-1px)}
+.qc .qi{font-size:28px;margin-bottom:5px}.qc h4{font:700 13px/1.2 'Montserrat',sans-serif;text-transform:uppercase;letter-spacing:.2px;margin:0 0 3px;color:var(--bd)}
+.qc p{margin:0;font-size:13px;color:var(--gr);line-height:1.3}
+
+/* ======= NEWS + PUBLIC NOTICES + EVENTS/CALENDAR (3-col, existing) ======= */
+.mid{max-width:var(--mw);margin:0 auto;padding:40px 24px}
+.mg3{display:grid;grid-template-columns:1.3fr 1fr 1fr;gap:24px;align-items:start}
+.st{font:800 16px/1 'Montserrat',sans-serif;text-transform:uppercase;letter-spacing:.3px;color:var(--b);margin:0 0 12px;display:flex;justify-content:space-between;align-items:center}
+.st a{font:600 10px/1 'Open Sans',sans-serif;color:var(--g);text-decoration:none;text-transform:none;letter-spacing:0}.st a:hover{text-decoration:underline}
+.ni{padding:8px 0;border-bottom:1px solid #eee}.ni:first-child{padding-top:0}
+.nd{font-size:11px;color:var(--gr);font-weight:600;text-transform:uppercase;letter-spacing:.3px;margin-bottom:1px}
+.ni h4{margin:0;font-size:17px;font-weight:700;line-height:1.3}.ni h4 a{color:var(--text);text-decoration:none}.ni h4 a:hover{color:var(--b)}
+.ei{display:flex;gap:9px;padding:7px 0;border-bottom:1px solid #eee}.ei:first-child{padding-top:0}
+.ed{width:38px;height:42px;background:var(--b);color:#fff;border-radius:4px;display:flex;flex-direction:column;align-items:center;justify-content:center;flex-shrink:0}
+.ed .mo{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.4px}.ed .dy{font-size:15px;font-weight:800;line-height:1}
+.ei .ef h5{margin:0 0 1px;font-size:13px;font-weight:600;line-height:1.2}.ei .ef p{margin:0;font-size:11px;color:var(--gr)}
+
+/* ======= EDGE SIDEBAR (new, in right column below calendar) ======= */
+.esb{background:linear-gradient(160deg,var(--bd),var(--b));border-radius:7px;padding:16px;color:#fff;margin-top:14px}
+.esb .el{font:700 7px/1.3 'Montserrat',sans-serif;text-transform:uppercase;letter-spacing:1px;color:var(--g);margin-bottom:5px}
+.esb h4{font:800 15px/1.25 'Montserrat',sans-serif;text-transform:uppercase;letter-spacing:.2px;margin:0 0 4px}
+.esb>p{font-size:13px;color:rgba(255,255,255,.65);line-height:1.4;margin:0 0 8px}
+.esl{display:flex;flex-direction:column;gap:3px}
+.esl a{display:flex;align-items:center;gap:4px;color:#fff;text-decoration:none;font-size:13px;font-weight:600;padding:4px 6px;background:rgba(255,255,255,.05);border-radius:3px;transition:background .1s}
+.esl a:hover{background:rgba(255,255,255,.1)}.esl a .ar{margin-left:auto;opacity:.4;font-size:11px}
+
+/* ======= FEATURED SERVICES (OC Featured Content row) ======= */
+.svc{background:var(--bg);padding:36px 0}
+.svc .w{max-width:var(--mw);margin:0 auto;padding:0 24px}
+.sg{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:14px}
+.sc{background:#fff;border:1px solid #e0e0e0;border-radius:5px;padding:22px 18px;text-decoration:none;color:var(--text);transition:all .12s;cursor:pointer}
+.sc:hover{border-color:var(--b);box-shadow:0 2px 12px rgba(0,0,0,.04);transform:translateY(-1px)}
+.sc .si{font-size:26px;margin-bottom:6px}.sc h4{font:700 13px/1.2 'Montserrat',sans-serif;text-transform:uppercase;letter-spacing:.2px;margin:0 0 4px;color:var(--bd)}
+.sc p{margin:0;font-size:13px;color:var(--gr);line-height:1.4}
+.sc.es{border-color:var(--g);background:linear-gradient(to bottom right,#f6faed,#fff)}.sc.es h4{color:var(--gd)}
+
+/* ======= EDGE PROMO BAND (new) ======= */
+.eb{background:linear-gradient(135deg,var(--bd),var(--b) 60%,#008fbd);position:relative;overflow:hidden}
+.eb .w{max-width:var(--mw);margin:0 auto;padding:42px 24px;display:grid;grid-template-columns:1.3fr 1fr;gap:32px;align-items:center;position:relative;z-index:1}
+.ebt{color:#fff}
+.ebt .ebl{font:700 10px/1.3 'Montserrat',sans-serif;text-transform:uppercase;letter-spacing:1px;color:var(--g);margin-bottom:7px;display:flex;align-items:center;gap:4px}
+.ebt h3{font:800 26px/1.2 'Montserrat',sans-serif;text-transform:uppercase;letter-spacing:.2px;margin:0 0 7px}
+.ebt>p{font-size:17px;color:rgba(255,255,255,.75);line-height:1.5;margin:0 0 16px;max-width:460px}
+.ebp{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.ebp a{display:flex;align-items:center;gap:7px;padding:9px 11px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:5px;color:#fff;text-decoration:none;font-size:13px;font-weight:600;transition:all .1s;cursor:pointer}
+.ebp a:hover{background:rgba(255,255,255,.09);border-color:rgba(255,255,255,.15)}
+.ebp a .pi{font-size:17px}.ebp a .ps{display:block;font-size:10px;font-weight:400;color:rgba(255,255,255,.45);margin-top:1px}
+/* MEDA preview */
+.mb{background:rgba(0,0,0,.15);border:1px solid rgba(255,255,255,.05);border-radius:9px;padding:18px;color:#fff}
+.mh{display:flex;align-items:center;gap:6px;margin-bottom:10px}
+.ma{width:26px;height:26px;background:var(--g);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px}
+.mh .mn{font-weight:700;font-size:13px}.mh .ms{font-size:11px;color:var(--g)}
+.mbu{background:rgba(255,255,255,.05);border-radius:7px;padding:9px 10px;font-size:13px;line-height:1.4;color:rgba(255,255,255,.8);margin-bottom:8px}
+.mch{display:flex;flex-wrap:wrap;gap:3px;margin-bottom:10px}
+.mch button{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08);color:#fff;padding:3px 8px;border-radius:12px;font-size:11px;font-family:inherit;cursor:pointer}.mch button:hover{background:rgba(255,255,255,.12)}
+.mgo{display:block;width:100%;text-align:center;padding:8px;background:var(--g);color:#fff;font:800 12px/1 'Montserrat',sans-serif;text-transform:uppercase;letter-spacing:.3px;border:none;border-radius:4px;cursor:pointer;text-decoration:none}.mgo:hover{background:var(--gd)}
+
+/* ======= SUBSCRIBE ======= */
+.sub{background:var(--bd);padding:28px 0;color:#fff}
+.sub .w{max-width:var(--mw);margin:0 auto;padding:0 24px;display:flex;align-items:center;justify-content:space-between;gap:14px}
+.sub h3{font:800 16px/1 'Montserrat',sans-serif;text-transform:uppercase;letter-spacing:.3px;margin:0 0 2px}
+.sub p{margin:0;font-size:13px;color:rgba(255,255,255,.55)}
+.sf{display:flex}.sf input{padding:7px 10px;border:2px solid rgba(255,255,255,.15);background:rgba(255,255,255,.06);color:#fff;font-size:13px;font-family:inherit;border-radius:3px 0 0 3px;width:200px;outline:none}
+.sf input::placeholder{color:rgba(255,255,255,.28)}.sf button{background:var(--g);color:#fff;border:none;padding:10px 24px;font:700 12px/1 'Montserrat',sans-serif;text-transform:uppercase;letter-spacing:.3px;border-radius:0 3px 3px 0;cursor:pointer}
+
+/* ======= FOOTER ======= */
+.ft{background:#0c2230;color:rgba(255,255,255,.55);padding:36px 0 14px}
+.fg{max-width:var(--mw);margin:0 auto;padding:0 24px;display:grid;grid-template-columns:1.5fr 1fr 1fr 1fr;gap:28px}
+.fc h5{font:700 11px/1 'Montserrat',sans-serif;text-transform:uppercase;letter-spacing:.5px;color:#fff;margin:0 0 8px}
+.fc p{font-size:13px;line-height:1.5;margin:0 0 4px}.fc a{color:rgba(255,255,255,.55);text-decoration:none;font-size:13px;display:block;padding:2px 0}.fc a:hover{color:var(--g)}
+.fc.ec h5{color:var(--g)}
+.fb{max-width:var(--mw);margin:20px auto 0;padding:12px 24px 0;border-top:1px solid rgba(255,255,255,.05);font-size:11px;color:rgba(255,255,255,.25);text-align:center}
+
+/* ======= FLOATING FAB ======= */
+.fab{position:fixed;bottom:18px;right:18px;z-index:9000;display:flex;align-items:center;gap:6px;background:linear-gradient(135deg,var(--bd),var(--b));color:#fff;padding:9px 14px;border-radius:28px;text-decoration:none;font:700 12px/1 'Montserrat',sans-serif;text-transform:uppercase;letter-spacing:.2px;box-shadow:0 3px 16px rgba(0,90,130,.3);cursor:pointer;transition:all .12s;border:2px solid rgba(114,163,0,.2)}
+.fab:hover{transform:translateY(-2px);box-shadow:0 5px 22px rgba(0,90,130,.4);border-color:var(--g)}
+.fab .fd{width:5px;height:5px;background:var(--g);border-radius:50%;animation:p 2s infinite}
+
+/* ======= NOTES ======= */
+.ntg{position:fixed;bottom:58px;left:14px;z-index:9998;background:#1a1a2e;color:#fff;border:none;padding:5px 10px;border-radius:4px;font:700 11px/1 'Montserrat',sans-serif;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.2);text-transform:uppercase;letter-spacing:.2px}
+.np{position:fixed;bottom:86px;left:14px;z-index:9999;background:#fff;border:1px solid #ddd;border-radius:7px;box-shadow:0 4px 20px rgba(0,0,0,.08);padding:14px 16px;max-width:380px;max-height:65vh;overflow-y:auto;font-size:13px;line-height:1.45;display:none}
+.np.v{display:block}.np h4{font:700 12px/1 'Montserrat',sans-serif;color:var(--b);margin:0 0 5px;text-transform:uppercase;letter-spacing:.2px}
+.np h5{font:700 10px/1.2 'Montserrat',sans-serif;color:var(--bd);margin:10px 0 3px;text-transform:uppercase}
+.np ul{margin:4px 0;padding-left:13px}.np li{margin-bottom:3px}
+.np .x{position:absolute;top:7px;right:9px;background:none;border:none;font-size:13px;cursor:pointer;color:#999}
+.np .audit{background:var(--bg);border-radius:4px;padding:8px 10px;margin:8px 0;font-size:11px;line-height:1.5}
+.np .audit strong{color:var(--b)}
+
+@media(max-width:1100px){.mg3{grid-template-columns:1fr 1fr;gap:20px}.fg{grid-template-columns:1fr 1fr 1fr 1fr}}
+@media(max-width:900px){.hero .w,.eb .w{grid-template-columns:1fr;gap:24px}.mg3{grid-template-columns:1fr}.qg{grid-template-columns:repeat(2,1fr)}.sg{grid-template-columns:1fr 1fr}.fg{grid-template-columns:1fr 1fr}.sub .w{flex-direction:column;text-align:center}.mega{min-width:auto;left:-50px;right:0}.nv .w{flex-wrap:wrap}.tr{flex-wrap:wrap}}
+@media(max-width:600px){.qg{grid-template-columns:1fr}.sg{grid-template-columns:1fr}.fg{grid-template-columns:1fr}.hb{flex-direction:column}.eql{grid-template-columns:1fr}.ebp{grid-template-columns:1fr}.sr input{width:140px}.pb{flex-wrap:wrap;font-size:10px}.pb .lg{display:none}}
+</style>
+</head>
+<body>
+
+<div class="pb"><span class="tg">V4 · FAITHFUL RESKIN</span><span class="i">medfordoregon.gov — <b>1:1 homepage audit</b> + EDGE integration · All existing elements preserved · OpenCities-compatible</span><div class="lg"><div style="display:flex;align-items:center;gap:3px"><div class="g"></div> New</div><div style="display:flex;align-items:center;gap:3px"><div class="o"></div> Modified</div></div></div>
+
+<!-- ======= UTILITY BAR (existing — unchanged) ======= -->
+<div class="ut"><div class="w">
+  <a href="https://www.medfordoregon.gov/Home/Tabs/Do-it-online/Solve-a-Problem/Solve-a-Problem">Report a Concern</a>
+  <a href="https://www.medfordoregon.gov/Government/Departments">Departments</a>
+  <a href="https://www.medfordoregon.gov/Home/Tabs/Do-it-online/Who-to-Call-at-City-Hall/Who-to-Call-at-City-Hall">Contact Us</a>
+</div></div>
+
+<!-- ======= HEADER (existing — unchanged) ======= -->
+<header class="hd"><div class="w">
+  <a href="https://www.medfordoregon.gov/Home" class="lo"><img src="logo_medford_oregon_color_horizontal.png" alt="City of Medford, Oregon" style="height:44px;width:auto;"></a>
+  <div class="sr"><input type="text" placeholder="Search medfordoregon.gov"><button>🔍</button></div>
+</div></header>
+
+<!-- ======= NAV (existing — Business mega menu preserved, EDGE section added inside it) ======= -->
+<nav class="nv"><div class="w">
+  <a href="https://www.medfordoregon.gov/Home" class="on">HOME</a>
+  <a href="https://www.medfordoregon.gov/Government">GOVERNMENT <span class="c">▾</span></a>
+  <a href="https://www.medfordoregon.gov/Services">SERVICES <span class="c">▾</span></a>
+  <a href="https://www.medfordoregon.gov/Residents">RESIDENTS <span class="c">▾</span></a>
+  <div class="biz-wrap">
+    <a href="https://www.medfordoregon.gov/Business">BUSINESS <span class="c">▾</span></a>
+    <!-- MEGA MENU (existing structure preserved + EDGE column added) -->
+    <div class="mega">
+      <div class="mega-cols">
+        <div>
+          <h6>DEVELOPMENT SERVICES</h6>
+          <a href="https://www.medfordoregon.gov/Business/Development-Services">Overview</a>
+          <a href="https://www.medfordoregon.gov/Government/Departments/Building-Safety/Apply-for-a-Permit">Building Permits</a>
+          <a href="https://www.medfordoregon.gov/Business/Development-Services/Business-Licensing">Business Licensing</a>
+          <a href="https://www.medfordoregon.gov/Government/Departments/Planning/Planning-Zoning-Landing-Page">Planning &amp; Zoning</a>
+          <a href="https://www.medfordoregon.gov/Business/Development-Services">Public Improvement Plan Review</a>
+          <a href="https://www.medfordoregon.gov/Business/Development-Services">Public Works Permits</a>
+          <a href="https://permits.medfordoregon.gov/">Online Building Permit Services</a>
+          <a href="https://permits.medfordoregon.gov/">Request an Inspection</a>
+          <a href="https://www.medfordoregon.gov/Services/Geographic-Information-System">Maps</a>
+        </div>
+        <div>
+          <h6>DOING BUSINESS WITH THE CITY</h6>
+          <a href="https://www.medfordoregon.gov/Business/Bid-Opportunities-Main-Page">Bid Opportunities</a>
+          <a href="https://www.medfordoregon.gov/Government/Departments/Finance/Purchasing-Division/Register-as-a-Vendor">Register as a Vendor</a>
+          <a href="https://www.medfordoregon.gov/Government/Departments/Finance/Purchasing-Division">Purchasing Division</a>
+          <a href="https://www.medfordoregon.gov/Business/Development-Services/Business-Licensing/New-Business-Listings">New Business Listings</a>
+          <a href="https://www.medfordoregon.gov/Business/Development-Services/Business-Licensing/Pay-Renew-or-Search-for-an-Active-Business-License">Pay / Renew Business License</a>
+        </div>
+        <!-- ★ EDGE COLUMN (new — additive) -->
+        <div class="edge-sec" data-e="★ New mega menu column">
+          <h6>ECONOMIC DEVELOPMENT</h6>
+          <a href="https://edge.medfordoregon.gov" onclick="event.preventDefault()">→ Start a Business</a>
+          <a href="https://edge.medfordoregon.gov" onclick="event.preventDefault()">→ Grow &amp; Expand</a>
+          <a href="https://edge.medfordoregon.gov" onclick="event.preventDefault()">→ Incentive Finder</a>
+          <a href="https://edge.medfordoregon.gov" onclick="event.preventDefault()">→ Site Selector</a>
+          <a href="https://edge.medfordoregon.gov" onclick="event.preventDefault()">→ Economic Data</a>
+          <a href="https://edge.medfordoregon.gov" onclick="event.preventDefault()">→ Ask MEDA (AI)</a>
+          <a href="https://edge.medfordoregon.gov" onclick="event.preventDefault()"><strong>Explore EDGE →</strong></a>
+        </div>
+      </div>
+    </div>
+  </div>
+  <a href="https://www.medfordoregon.gov/Community">COMMUNITY <span class="c">▾</span></a>
+</div></nav>
+
+<!-- ======= HERO (OC Rotating Banner — existing left side, EDGE card added right) ======= -->
+<section class="hero"><div class="w">
+  <div>
+    <h2>WELCOME TO THE CITY OF&nbsp;MEDFORD</h2>
+    <p>Your one-stop resource for information about the City of Medford — news, events, our City Council, and services available to community members.</p>
+    <div class="hb">
+      <a href="https://www.medfordoregon.gov/Services/Make-a-Payment" class="hbn p">PAY MY BILL</a>
+      <a href="https://www.medfordoregon.gov/Home/Tabs/Do-it-online/Solve-a-Problem/Solve-a-Problem" class="hbn s">REPORT A CONCERN</a>
+      <a href="https://www.medfordoregon.gov/Services" class="hbn s">FIND A SERVICE</a>
+    </div>
+  </div>
+  <div class="ec" data-e="★ New hero card">
+    <div class="ey"><span class="d"></span> ECONOMIC DEVELOPMENT</div>
+    <h3>STARTING, GROWING, OR INVESTING IN A BUSINESS?</h3>
+    <p>Permits, incentives, workforce data, sites, and an AI assistant — all in one place.</p>
+    <div class="eql">
+      <a href="#" onclick="event.preventDefault()"><span>🚀</span> Start a Business</a>
+      <a href="#" onclick="event.preventDefault()"><span>📈</span> Grow &amp; Expand</a>
+      <a href="#" onclick="event.preventDefault()"><span>🏗️</span> Invest &amp; Develop</a>
+      <a href="#" onclick="event.preventDefault()"><span>📊</span> Economic Data</a>
+    </div>
+    <a class="ego" href="https://edge.medfordoregon.gov" onclick="event.preventDefault()">EXPLORE MEDFORD EDGE →</a>
+  </div>
+</div></section>
+
+<!-- ======= DO IT ONLINE TABS (existing 3: Our Government, Solve a Problem, Who to Call — all preserved) ======= -->
+<section class="tabs"><div class="w">
+  <div class="tr">
+    <button class="tb on" onclick="st(event,'t1')">DO IT ONLINE</button>
+    <button class="tb" onclick="st(event,'t2')">OUR GOVERNMENT</button>
+    <button class="tb" onclick="st(event,'t3')">SOLVE A PROBLEM</button>
+    <button class="tb" onclick="st(event,'t4')">WHO TO CALL</button>
+  </div>
+  <!-- Do It Online (primary tab — existing quick-action buttons) -->
+  <div id="t1" class="tc on">
+    <div class="qg">
+      <a class="qc" href="https://www.medfordoregon.gov/Services/Make-a-Payment"><div class="qi">💳</div><h4>PAY MY BILL</h4><p>Utility billing &amp; payments</p></a>
+      <a class="qc" href="https://www.medfordoregon.gov/Government/Departments/Building-Safety/Apply-for-a-Permit"><div class="qi">🏗️</div><h4>APPLY FOR A PERMIT</h4><p>Building &amp; development</p></a>
+      <a class="qc" href="https://www.medfordoregon.gov/Home/Tabs/Do-it-online/Solve-a-Problem/Solve-a-Problem"><div class="qi">🚨</div><h4>REPORT A CONCERN</h4><p>Streets, lights, code</p></a>
+      <a class="qc" href="https://permits.medfordoregon.gov/"><div class="qi">🔍</div><h4>CHECK PERMIT STATUS</h4><p>Online portal</p></a>
+      <a class="qc" href="https://www.medfordoregon.gov/Business/Development-Services/Business-Licensing"><div class="qi">📋</div><h4>BUSINESS LICENSE</h4><p>Apply, renew, or search</p></a>
+      <a class="qc" href="https://www.medfordoregon.gov/Government/Municipal-Court-Services/Skip-the-LinePay-A-Ticket"><div class="qi">🚗</div><h4>PAY A TICKET</h4><p>Municipal court payments</p></a>
+      <a class="qc" href="https://www.medfordoregon.gov/Government/Departments/Parks-Recreation-and-Facilities"><div class="qi">🌳</div><h4>PARKS &amp; REC</h4><p>Programs &amp; facilities</p></a>
+      <a class="qc" href="https://www.medfordoregon.gov/Services/Geographic-Information-System"><div class="qi">🗺️</div><h4>MAPS &amp; GIS</h4><p>Parcels, zoning, land info</p></a>
+    </div>
+  </div>
+  <!-- Our Government (existing) -->
+  <div id="t2" class="tc">
+    <div class="qg">
+      <a class="qc" href="https://www.medfordoregon.gov/Government/Mayor-City-Council"><div class="qi">🏛️</div><h4>MAYOR &amp; COUNCIL</h4><p>Elected officials</p></a>
+      <a class="qc" href="https://www.medfordoregon.gov/Government/Departments"><div class="qi">📋</div><h4>DEPARTMENTS</h4><p>Full directory</p></a>
+      <a class="qc" href="https://www.medfordoregon.gov/Government"><div class="qi">👥</div><h4>BOARDS &amp; COMMISSIONS</h4><p>Volunteer boards</p></a>
+      <a class="qc" href="https://www.medfordoregon.gov/Government"><div class="qi">💼</div><h4>JOBS</h4><p>Current openings</p></a>
+      <a class="qc" href="https://www.medfordoregon.gov/Government/Public-Notices"><div class="qi">📢</div><h4>PUBLIC RECORDS</h4><p>Records &amp; municipal code</p></a>
+      <a class="qc" href="https://www.medfordoregon.gov/Government/Agendas-and-Minutes"><div class="qi">📄</div><h4>AGENDAS &amp; MINUTES</h4><p>Council &amp; committee</p></a>
+    </div>
+  </div>
+  <!-- Solve a Problem (existing) -->
+  <div id="t3" class="tc">
+    <div class="qg">
+      <a class="qc" href="https://www.medfordoregon.gov/Home/Tabs/Do-it-online/Solve-a-Problem/Solve-a-Problem"><div class="qi">📝</div><h4>ONLINE REQUEST FORM</h4><p>Streets, traffic, lights, sewer, ADA</p></a>
+      <a class="qc" href="https://www.medfordoregon.gov/Home/Tabs/Do-it-online/Solve-a-Problem/Solve-a-Problem"><div class="qi">🕳️</div><h4>POTHOLE / STREET</h4><p>Report road damage</p></a>
+      <a class="qc" href="https://www.medfordoregon.gov/Home/Tabs/Do-it-online/Solve-a-Problem/Solve-a-Problem"><div class="qi">🏠</div><h4>CODE COMPLIANCE</h4><p>Property maintenance</p></a>
+      <a class="qc" href="https://www.medfordoregon.gov/Home/Tabs/Do-it-online/Solve-a-Problem/Solve-a-Problem"><div class="qi">💡</div><h4>STREETLIGHT OUT</h4><p>Report broken lights</p></a>
+    </div>
+  </div>
+  <!-- Who to Call (existing) -->
+  <div id="t4" class="tc">
+    <div class="qg">
+      <a class="qc" href="https://www.medfordoregon.gov/Home/Tabs/Do-it-online/Who-to-Call-at-City-Hall/Who-to-Call-at-City-Hall"><div class="qi">📞</div><h4>CITY HALL MAIN LINE</h4><p>(541) 774-2000</p></a>
+      <a class="qc" href="#"><div class="qi">🚔</div><h4>POLICE NON-EMERGENCY</h4><p>(541) 776-7206</p></a>
+      <a class="qc" href="https://www.medfordoregon.gov/Government/Departments/Finance/Utility-Billing"><div class="qi">💧</div><h4>UTILITY BILLING</h4><p>(541) 774-2090</p></a>
+      <a class="qc" href="https://www.medfordoregon.gov/Business/Development-Services"><div class="qi">🏗️</div><h4>DEVELOPMENT SERVICES</h4><p>(541) 774-2380</p></a>
+    </div>
+  </div>
+</div></section>
+
+<!-- ======= NEWS + PUBLIC NOTICES + EVENTS/CALENDAR (all 3 existing homepage sections preserved) ======= -->
+<section class="mid"><div class="mg3">
+  <!-- COL 1: NEWS (existing OC News listing) -->
+  <div>
+    <div class="st">LATEST NEWS <a href="https://www.medfordoregon.gov/News-Articles">View All →</a></div>
+    <div class="ni"><div class="nd">APRIL 13, 2026</div><h4><a href="https://www.medfordoregon.gov/News-Articles">Spring "Big Sweep" to Begin on April 21</a></h4></div>
+    <div class="ni"><div class="nd">APRIL 9, 2026</div><h4><a href="https://www.medfordoregon.gov/News-Articles">Aerial Application to Control Mosquito Larvae</a></h4></div>
+    <div class="ni"><div class="nd">APRIL 6, 2026</div><h4><a href="https://www.medfordoregon.gov/News-Articles">Registration Open for Run Medford Road Race</a></h4></div>
+    <div class="ni"><div class="nd">APRIL 22, 2025</div><h4><a href="https://www.medfordoregon.gov/News-Articles/City-of-Medford-Announces-New-Leadership">City Announces New Leadership</a></h4></div>
+    <!-- Stay Connected moved here under News -->
+    <div style="background:var(--bg);border-radius:5px;padding:12px;border:1px solid #e0e0e0;margin-top:14px;">
+      <h5 style="font:700 11px/1 'Montserrat',sans-serif;text-transform:uppercase;letter-spacing:.4px;color:var(--b);margin:0 0 4px;">STAY CONNECTED</h5>
+      <p style="font-size:13px;color:var(--gr);line-height:1.35;margin:0 0 5px;">City news and alerts to your inbox.</p>
+      <a href="https://www.medfordoregon.gov/Residents/Communications/Medford-eNews" style="color:var(--g);font-size:13px;font-weight:600;text-decoration:none;">Subscribe to Medford eNews →</a>
+    </div>
+  </div>
+
+  <!-- COL 2: PUBLIC NOTICES + EVENTS CALENDAR (both existing) -->
+  <div>
+    <div class="st">PUBLIC NOTICES <a href="https://www.medfordoregon.gov/Government/Public-Notices">View All →</a></div>
+    <div class="ni"><div class="nd">PLANNING DEPT</div><h4><a href="https://www.medfordoregon.gov/Government/Departments/Planning/Public-Notices">Land Use Public Notices</a></h4></div>
+    <div class="ni"><div class="nd">CITY-WIDE</div><h4><a href="https://www.medfordoregon.gov/Government/Public-Notices">All City Public Notices</a></h4></div>
+
+    <div class="st" style="margin-top:18px;">MEETINGS &amp; EVENTS <a href="https://www.medfordoregon.gov/Government/Meeting-Event-Calendar">Calendar →</a></div>
+    <div class="ei"><div class="ed"><span class="mo">APR</span><span class="dy">15</span></div><div class="ef"><h5>Library Board of Trustees</h5><p>10:00 AM · City Hall</p></div></div>
+    <div class="ei"><div class="ed"><span class="mo">APR</span><span class="dy">15</span></div><div class="ef"><h5>Community Development Board</h5><p>6:30 PM · City Hall</p></div></div>
+    <div class="ei"><div class="ed"><span class="mo">APR</span><span class="dy">16</span></div><div class="ef"><h5>YouthWorks Info Session</h5><p>5:00 PM</p></div></div>
+  </div>
+
+  <!-- COL 3: EDGE SIDEBAR (new — now the sole occupant of this column) -->
+  <div>
+    <div class="esb" data-e="★ New sidebar widget">
+      <div class="el">ECONOMIC DEVELOPMENT</div>
+      <h4>GOT A BUSINESS QUESTION?</h4>
+      <p>Permits, zoning, incentives, workforce — our AI tools have answers 24/7.</p>
+      <div class="esl">
+        <a href="#" onclick="event.preventDefault()">🚀 Start a Business <span class="ar">→</span></a>
+        <a href="#" onclick="event.preventDefault()">🔍 Find Incentives <span class="ar">→</span></a>
+        <a href="#" onclick="event.preventDefault()">🤖 Ask MEDA <span class="ar">→</span></a>
+        <a href="#" onclick="event.preventDefault()">📊 Economic Data <span class="ar">→</span></a>
+      </div>
+    </div>
+  </div>
+</div></section>
+
+<!-- ======= FEATURED SERVICES (OC Featured Content row — existing) ======= -->
+<section class="svc"><div class="w">
+  <div class="st">CITY SERVICES <a href="https://www.medfordoregon.gov/Services" style="color:var(--g);">All Services →</a></div>
+  <div class="sg">
+    <a class="sc" href="https://www.medfordoregon.gov/Government/Departments/Finance/Utility-Billing"><div class="si">💧</div><h4>UTILITY BILLING</h4><p>Manage water, sewer, and storm drain accounts.</p></a>
+    <a class="sc" href="https://www.medfordoregon.gov/Business/Development-Services"><div class="si">🏗️</div><h4>DEVELOPMENT SERVICES</h4><p>Building permits, plan review, inspections, licensing.</p></a>
+    <a class="sc" href="https://www.medfordoregon.gov/Government/Departments/Parks-Recreation-and-Facilities"><div class="si">🌳</div><h4>PARKS &amp; RECREATION</h4><p>Trails, facilities, youth programs, reservations.</p></a>
+    <a class="sc" href="https://www.medfordoregon.gov/Government/Departments/Planning"><div class="si">🗺️</div><h4>PLANNING</h4><p>Land use, long range planning, zoning.</p></a>
+    <a class="sc" href="https://www.medfordoregon.gov/Services"><div class="si">🛤️</div><h4>PUBLIC WORKS</h4><p>Streets, sidewalks, traffic, stormwater.</p></a>
+    <a class="sc es" href="https://edge.medfordoregon.gov" data-e="★ New EDGE card" onclick="event.preventDefault()"><div class="si">🌿</div><h4>ECONOMIC DEVELOPMENT</h4><p>Start or grow a business, find incentives, explore data.</p></a>
+  </div>
+</div></section>
+
+<!-- ======= EDGE PROMO BAND (new — full-width additive section) ======= -->
+<section class="eb" data-e="★ New section · OC Featured Content + custom CSS">
+  <div class="w">
+    <div class="ebt">
+      <div class="ebl"><span style="width:5px;height:5px;background:var(--g);border-radius:50%;display:inline-block;"></span> MEDFORD EDGE — ECONOMIC DEVELOPMENT</div>
+      <h3>YOUR BUSINESS HAS A PARTNER AT CITY&nbsp;HALL</h3>
+      <p>Whether you're opening your first storefront, expanding, or evaluating Southern Oregon — Medford EDGE puts permits, incentives, data, sites, and an AI agent in one place.</p>
+      <div class="ebp">
+        <a href="#" onclick="event.preventDefault()"><span class="pi">🚀</span><span>Starting a Business<span class="ps">Checklist, permits &amp; funding</span></span></a>
+        <a href="#" onclick="event.preventDefault()"><span class="pi">📈</span><span>Growing My Business<span class="ps">Incentives &amp; workforce</span></span></a>
+        <a href="#" onclick="event.preventDefault()"><span class="pi">🏗️</span><span>Developer / Investor<span class="ps">Sites, zoning &amp; projects</span></span></a>
+        <a href="#" onclick="event.preventDefault()"><span class="pi">🏭</span><span>Site Selector<span class="ps">Data, costs &amp; comparisons</span></span></a>
+      </div>
+    </div>
+    <div class="mb">
+      <div class="mh"><div class="ma">🌿</div><div><div class="mn">MEDA — Business Agent</div><div class="ms">● Online 24/7</div></div></div>
+      <div class="mbu">Hi! I'm MEDA, Medford's AI economic development assistant. I can help with permits, licensing, zoning, incentives, workforce data, and more.</div>
+      <div class="mch"><button>What permits do I need?</button><button>Find incentives</button><button>Workforce data</button></div>
+      <a class="mgo" href="https://edge.medfordoregon.gov" onclick="event.preventDefault()">ASK MEDA ANYTHING →</a>
+    </div>
+  </div>
+</section>
+
+<!-- ======= SUBSCRIBE (existing) ======= -->
+<section class="sub"><div class="w">
+  <div><h3>STAY IN THE LOOP</h3><p>Subscribe to alerts and get city news to your inbox.</p></div>
+  <div class="sf"><input type="email" placeholder="Enter your email"><button>SUBSCRIBE</button></div>
+</div></section>
+
+<!-- ======= FOOTER (existing structure + EDGE column added) ======= -->
+<footer class="ft"><div class="fg">
+  <div class="fc"><h5>CITY OF MEDFORD</h5><p>411 W 8th Street<br>Medford, OR 97501</p><p>(541) 774-2000</p><p>comments@cityofmedford.org</p></div>
+  <div class="fc"><h5>GOVERNMENT</h5>
+    <a href="https://www.medfordoregon.gov/Government/Mayor-City-Council">Mayor &amp; City Council</a>
+    <a href="https://www.medfordoregon.gov/Government/Departments">Departments</a>
+    <a href="https://www.medfordoregon.gov/Government/Agendas-and-Minutes">Agendas &amp; Minutes</a>
+    <a href="https://www.medfordoregon.gov/Government/Public-Notices">Public Notices</a>
+    <a href="https://www.medfordoregon.gov/Government/Meeting-Event-Calendar">Meeting Calendar</a>
+  </div>
+  <div class="fc"><h5>SERVICES</h5>
+    <a href="https://www.medfordoregon.gov/Government/Departments/Finance/Utility-Billing">Utility Billing</a>
+    <a href="https://www.medfordoregon.gov/Business/Development-Services">Development Services</a>
+    <a href="https://www.medfordoregon.gov/Government/Departments/Parks-Recreation-and-Facilities">Parks &amp; Recreation</a>
+    <a href="https://www.medfordoregon.gov/Services/Geographic-Information-System">Maps &amp; GIS</a>
+    <a href="https://www.medfordoregon.gov/Business/Bid-Opportunities-Main-Page">Bid Opportunities</a>
+  </div>
+  <div class="fc ec">
+    <h5 data-e="★ New footer column" style="outline-offset:6px;">BUSINESS &amp; ECONOMY</h5>
+    <a href="#" onclick="event.preventDefault()">Start a Business</a>
+    <a href="#" onclick="event.preventDefault()">Grow Your Business</a>
+    <a href="#" onclick="event.preventDefault()">Site Selector Tools</a>
+    <a href="#" onclick="event.preventDefault()">Incentive Finder</a>
+    <a href="#" onclick="event.preventDefault()">Economic Data</a>
+    <a href="#" onclick="event.preventDefault()">Ask MEDA (AI)</a>
+  </div>
+</div><div class="fb">© 2026 City of Medford, Oregon · All Rights Reserved</div></footer>
+
+<!-- FLOATING FAB -->
+<a href="https://edge.medfordoregon.gov" class="fab" data-e="★ FAB" onclick="event.preventDefault()">🌿 BUSINESS HELP <span class="fd"></span></a>
+
+<!-- NOTES -->
+<button class="ntg" onclick="document.getElementById('np').classList.toggle('v')">📝 AUDIT &amp; IMPLEMENTATION</button>
+<div class="np" id="np">
+  <button class="x" onclick="this.parentElement.classList.remove('v')">✕</button>
+  <h4>HOMEPAGE ELEMENT AUDIT</h4>
+  <p>Every existing homepage element is accounted for. Nothing removed.</p>
+
+  <div class="audit">
+    <strong>EXISTING NAV (preserved as-is):</strong> Home · Government ▾ · Services ▾ · Residents ▾ · Business ▾ · Community ▾<br><br>
+    <strong>BUSINESS MEGA MENU (preserved as-is):</strong><br>
+    ↳ Development Services → Building Permits, Business Licensing, Planning &amp; Zoning, Public Improvement Plan Review, Public Works Permits, Online Building Permit Services, Request an Inspection, Maps<br>
+    ↳ Bid Opportunities<br>
+    ↳ Register as a Vendor<br>
+    ↳ Purchasing Division<br>
+    ↳ New Business Listings<br>
+    ↳ Pay/Renew Business License<br>
+    ★ EDGE column added alongside — does NOT replace any existing links<br><br>
+    <strong>HOMEPAGE TABS (existing 3 preserved):</strong><br>
+    ↳ Do It Online (Pay Bill, Apply for Permit, Report Concern, Check Permit Status, Business License, Pay Ticket, Parks, Maps)<br>
+    ↳ Our Government (Mayor, Departments, Boards, Jobs, Public Records, Agendas)<br>
+    ↳ Solve a Problem (Online Request, Pothole, Code Compliance, Streetlight)<br>
+    ↳ Who to Call (City Hall, Police, Utility, Dev Services)<br><br>
+    <strong>HOMEPAGE CONTENT SECTIONS (all preserved):</strong><br>
+    ↳ Latest News (OC News listing)<br>
+    ↳ Public Notices (links to /Government/Public-Notices and Planning notices)<br>
+    ↳ Meetings &amp; Events calendar (OC Event listing w/ calendar link)<br>
+    ↳ Stay Connected / eNews subscribe<br>
+    ↳ City Services featured row (Utility, Dev Services, Parks, Planning, Public Works)<br>
+    ↳ Subscribe bar
+  </div>
+
+  <h5>WHAT'S ADDED (6 TOUCHPOINTS)</h5>
+  <ul>
+    <li><strong style="color:var(--g);">Business Mega Menu:</strong> 3rd column added alongside existing 2 columns. Existing Dev Services + Bid/Vendor links untouched. EDGE links are additive.</li>
+    <li><strong style="color:var(--g);">Hero Card:</strong> Right side of existing OC Rotating Banner. OC Featured Content row.</li>
+    <li><strong style="color:var(--g);">Sidebar Widget:</strong> Below "Stay Connected" in right column. WYSIWYG + custom CSS class.</li>
+    <li><strong style="color:var(--g);">Services Row Card:</strong> 6th card added to existing services grid. Points to edge.medfordoregon.gov.</li>
+    <li><strong style="color:var(--g);">EDGE Promo Band:</strong> New full-width row between Services and Subscribe. OC Featured Content + custom CSS/JS.</li>
+    <li><strong style="color:var(--g);">Footer Column:</strong> 4th column added to existing 3-column footer.</li>
+  </ul>
+
+  <h5>WHAT'S NOT CHANGED</h5>
+  <ul>
+    <li>Business nav link still goes to /Business — all existing secondary &amp; tertiary pages preserved</li>
+    <li>Do It Online tabs: same 3 tabs, same buttons, same links</li>
+    <li>News, Public Notices, Meetings/Calendar: all present with correct links</li>
+    <li>No existing links removed or redirected</li>
+    <li>No departments lose their pages</li>
+  </ul>
+
+  <h5>THE PITCH TO CM &amp; COMMS</h5>
+  <p style="color:var(--b);">"We're not asking for a redesign. We're asking to add 6 elements to the existing homepage — all within OpenCities' documented component library. The Business mega menu keeps every existing link. Development Services, Bid Opportunities, Vendor Registration — all untouched. We're adding a third column to the mega menu, a card in the hero, a widget in the sidebar, one more service card, one promotional section, and a footer column. Every EDGE link routes to edge.medfordoregon.gov, which Econ Dev maintains independently. Comms retains 100% control of medfordoregon.gov."</p>
+</div>
+
+<script>
+function st(e,id){document.querySelectorAll('.tb').forEach(b=>b.classList.remove('on'));document.querySelectorAll('.tc').forEach(c=>c.classList.remove('on'));e.target.classList.add('on');document.getElementById(id).classList.add('on')}
+</script>
+</body>
+</html>
