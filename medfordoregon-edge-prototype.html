@@ -493,6 +493,16 @@ body{margin:0;padding-top:28px;font-family:'Open Sans',sans-serif;color:#333;bac
 
 <script>
 function st(e,id){document.querySelectorAll('.tb').forEach(b=>b.classList.remove('on'));document.querySelectorAll('.tc').forEach(c=>c.classList.remove('on'));e.target.classList.add('on');document.getElementById(id).classList.add('on')}
+
+// Visual mock only — production medfordoregon.gov pages refuse to be
+// framed (their server sends X-Frame-Options/frame-ancestors), so any
+// outbound link click would just blank the iframe. Suppress all link
+// navigation. The internal tab buttons (.tb) keep working since they
+// use onclick handlers, not href navigation.
+document.addEventListener('click', function(e) {
+  const a = e.target.closest('a[href]');
+  if (a) e.preventDefault();
+}, true);
 </script>
 </body>
 </html>
